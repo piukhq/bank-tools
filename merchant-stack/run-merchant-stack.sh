@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# This script will install, set environments, git pull and run Midas API, Midas consumer and Europa.
-# You'll need to have tmux installed for services to run (brew install tmux), and your terminal set up for github access via HTTPS.
-# You will also need poetry installed on your machine.
+# This script will install, set environments, git pull and run Midas API, Midas consumer, Europa, API Reflector and Callbacca.
+
+# For full instructions, please see 'Installing and running the merchant stack with run-merchant-stack.sh' on Confluence.
+
+# Requirements: 
+# - tmux
+# - poetry 
+# - git (authenticated in cli via either HTTPS or SSH (see below parameters))
 
 #Options:
 #-d <directory> : directory in which to install/run merchant services
@@ -13,7 +18,8 @@
 #-s true : uses SSH to clone git repositories (if omitted defaults to HTTPS)
 
 # You can update europa configurations at localhost:8050/config-service/admin
-# You may need to add a superuser for access to europa. From europa root directory > pipenv run python manage.py createsuperuser
+# If you do not have an existing user account in staging, you will need to create a superuser for access to europa. 
+# From europa root directory > pipenv run python manage.py createsuperuser
 
 while getopts ":d:u:p:r:i:s:" opt; do
   case $opt in
