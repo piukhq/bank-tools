@@ -4,6 +4,10 @@
 #
 # M Franklin 2022
 #
+# pipenv --python 3.9
+# pipenv install
+# pipenv install --dev shoiuld get you going
+# pipenv run Fidas.py
 
 import time
 from flask import Flask, request
