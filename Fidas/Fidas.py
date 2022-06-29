@@ -3,10 +3,10 @@
 # used to STUB Midas endpoints for local dev testing
 #
 # M Franklin 2022
-#
+# The following should get you up & running
 # pipenv --python 3.9
 # pipenv install
-# pipenv install --dev shoiuld get you going
+# pipenv install --dev
 # pipenv run Fidas.py
 
 import time
