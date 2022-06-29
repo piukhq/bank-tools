@@ -3,7 +3,7 @@
 # Fallbackr
 #
 # Fake Midas callbacks to hermes
-#
+# (I would NOT use the tkinter GUI!)
 #
 #
 
@@ -179,6 +179,6 @@ if __name__ == "__main__":
     # call update_status with the scheme account id
     # if you want a failed state just pass in an error
     # status e.g.: SchemeAccountStatus.GENERAL_ERROR
-    # print(update_status(243902))
-    fb = Fallbackr()
-    fb.mainloop()
+    print(update_status(243902))
+    # fb = Fallbackr()
+    # fb.mainloop()
