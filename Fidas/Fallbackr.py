@@ -153,7 +153,9 @@ class Fallbackr(Tk):
         server = Entry(lf, textvariable=self.scheme_account_id)
         server.pack(fill="x")
         
-        b = Button(self, text="Update Status", command=self.update_status)
+        b = Button(self, text="Active", command=self.active_status)
+        b.pack()
+        b = Button(self, text="Invalid Credentials", command=self.invalid_status)
         b.pack()
 
         self.loggee = ScrolledText(self, wrap="none")
@@ -168,10 +170,15 @@ class Fallbackr(Tk):
     def flush(self, *stuff):
         pass
 
-    def update_status(self):
+    def active_status(self):
         id = self.scheme_account_id.get()
         server = self.server.get()
         update_status(id, server=server)
+
+    def invalid_status(self):
+        id = self.scheme_account_id.get()
+        server = self.server.get()
+        update_status(id, server=server, status=SchemeAccountStatus.INVALID_CREDENTIALS)
 
 if __name__ == "__main__":
     # in your CLIENT code when you perform a PATCH Auth request (for example)

@@ -8,7 +8,6 @@
 # pipenv install
 # pipenv install --dev
 # pipenv run Fidas.py
-
 import time
 from flask import Flask, request
 
