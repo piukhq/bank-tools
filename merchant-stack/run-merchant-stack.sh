@@ -199,7 +199,7 @@ if [[ $db_update = "true" ]] ; then
 
   psql $uri -c 'DROP DATABASE IF EXISTS midas' -c 'DROP DATABASE IF EXISTS europa;' -c 'DROP DATABASE IF EXISTS api_reflector;' -c 'CREATE DATABASE midas;' -c 'CREATE DATABASE europa;' -c 'CREATE DATABASE api_reflector;'
 
-  psql postgresql://$db_username:$db_password@localhost:5432/europa < $directory/midas.sql
+  psql postgresql://$db_username:$db_password@localhost:5432/midas < $directory/midas.sql
   sleep 4
 
   psql postgresql://$db_username:$db_password@localhost:5432/api_reflector < $directory/api_reflector.sql
