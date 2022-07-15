@@ -1,5 +1,14 @@
 #!/bin/bash
 
+################################################################################
+# runs the Hermes & Angelia services needed to get API 1 & 2 up & running
+# TODO: Metis & Pelops
+# Requires:
+#     hermes & angelia code, postgres database etc etc 
+#     tmux
+################################################################################
+
+
 directory="~/dev"
 
 TMUX_SESSION_NAME='bank_stack'
