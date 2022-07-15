@@ -212,6 +212,14 @@ if [[ $db_update = "true" ]] ; then
   rm europa.sql
   rm api_reflector.sql
 
+  ##  update europa endpoints to localhost
+  # -- europa updater
+  echo "Executing merchant_url replacer: api-reflector --> localhost:6400"
+  uri=postgresql://$db_username:$db_password@localhost:5432/europa
+  psql $uri -c "update config_service_configuration set merchant_url = replace(merchant_url, 'api-reflector', 'localhost:6400');"
+  sleep 4
+
+
 fi
 }
 
