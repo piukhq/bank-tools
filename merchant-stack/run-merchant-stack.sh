@@ -186,10 +186,10 @@ if [[ $db_update = "true" ]] ; then
   pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_midas | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/midas.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/api_reflector.sql
+  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/http\:\/\/callbacca/http\:\/\/localhost\:6401/g' > $directory/api_reflector.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_europa | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/europa.sql
+  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_europa | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') | sed 's/http\:\/\/api-reflector/localhost\:6400/g' > $directory/europa.sql
   sleep 4
 
   kill %1
