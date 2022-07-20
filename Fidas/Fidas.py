@@ -8,6 +8,7 @@
 # pipenv install
 # pipenv install --dev
 # pipenv run Fidas.py
+import json
 import time
 from flask import Flask, request
 
@@ -15,7 +16,7 @@ from style import *
 import Fallbackr
 
 
-PORT = 8002  # Midas
+PORT = 8001  # Midas
 
 NOW = int(time.time())
 LATER = NOW + (60 * 60 * 24 * 5)
@@ -99,6 +100,12 @@ def midas_balance(scheme: str):
     if scheme_account_id not in app.scheme_ids:
         app.scheme_ids.append(scheme_account_id)
     
+    creds = request.args["credentials"]
+    print(f"Credentials from Hermes: {creds}")
+    # should hack together a dycrypt from midas code but meh; CBA
+    # aes = AESCipher(get_aes_key("aes-keys"))
+    # return json.loads(aes.decrypt(credentials.replace(" ", "+")))
+
     print("**** Midas : balance called ****")
 
     print(f"***** Is Fidas happy? {app.happy} *****")
@@ -276,5 +283,6 @@ def fallbackr():
 
 
 if __name__ == "__main__":
-    print("Visit: http://127.0.0.1:8002/index")
-    app.run(host="127.0.0.1", port=PORT, debug=True)
+    host = "127.0.0.1"
+    print(f"Visit: http://{host}:{PORT}/index")
+    app.run(host=host, port=PORT, debug=True)
