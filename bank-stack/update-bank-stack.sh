@@ -64,6 +64,17 @@ setup_services() {
 
 HERMES_ENV_FILE=$(
         cat <<EOF
+HERMES_DATABASE_HOST=localhost
+HERMES_DATABASE_PORT=5432
+MIDAS_URL=http://0.0.0.0:8001
+MASTER_LOG_LEVEL=INFO
+UBIQUITY_LOG_LEVEL=INFO
+METIS_URL=http://127.0.0.1:8095
+VAULT_URL=https://bink-uksouth-dev-com.vault.azure.net/
+SSO_OFF=True
+LOCAL_SECRETS=False
+PROMETHEUS_LOG_LEVEL=ERROR
+HERMES_LOCAL=True
 
 EOF
     )
@@ -71,7 +82,22 @@ EOF
 
 ANGELIA_ENV_FILE=$(
         cat <<EOF
-  
+
+LOG_LEVEL=DEBUG
+LOCAL_SECRETS=False
+POSTGRES_READ_DSN=postgresql://postgres@127.0.0.1:5432/hermes
+POSTGRES_WRITE_DSN=postgresql://postgres@127.0.0.1:5432/hermes
+RABBIT_PASSWORD=guest
+RABBIT_USER=guest
+RABBIT_HOST=127.0.0.1
+RABBIT_PORT=5672
+HERMES_URL=http://127.0.0.1:8000
+METRICS_SIDECAR_DOMAIN=localhost
+METRICS_PORT=4000
+PERFORMANCE_METRICS=0
+VAULT_URL=https://bink-uksouth-dev-com.vault.azure.net/
+QUERY_LOGGING=False
+
 EOF
     )
 
@@ -113,7 +139,7 @@ echo "- (Angelia) Checking out and updating master branch..."
 git checkout master
 git pull --ff-only origin master
 
-echo "- (Angelia) Synching .env and poetry..."
+echo "- (Angelia) Synching .env and pipenv..."
 echo "$ANGELIA_ENV_FILE" > .env && pipenv sync --dev
 
 # Create/update databases
