@@ -1,15 +1,11 @@
 #!/bin/bash
 
 ################################################################################
-# runs the Hermes & Angelia services needed to get API 1 & 2 up & running
-# TODO: Pelops
+# installs the Hermes & Angelia code base needed to get API 1 & 2 up & running
+# TODO: Pelops & Metis (poor things)
 # Requires:
-#     hermes, angelia & metis code, postgres database etc etc 
-#     tmux
+#     git (authenticated in cli via either HTTPS or SSH (see below parameters))
 ################################################################################
-
-# This script will install, set environments, git pull Hermes, Hermes database & Angelia
-# - git (authenticated in cli via either HTTPS or SSH (see below parameters))
 
 #Options:
 #-d <directory> : directory in which to install/run merchant services
