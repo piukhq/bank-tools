@@ -219,16 +219,10 @@ fi
 
 run_services(){
 
- echo "- Cloning Midas... git clone '${github_prefix}binkhq/midas.git'"
-
  TMUX_SESSION_NAME='merchant_stack'
-
-  tmux -2 new-session -d -s $TMUX_SESSION_NAME
-  tmux new-window -t $TMUX_SESSION_NAME -n 'merchant'
-
-#  echo "Starting services in tmux session: $TMUX_SESSION_NAME"
-#  tmux -2 new-session -d -s $TMUX_SESSION_NAME
-#  tmux new-window -t $TMUX_SESSION_NAME -n 'merchant'
+ echo "Starting services in tmux session: $TMUX_SESSION_NAME"
+ tmux -2 new-session -d -s $TMUX_SESSION_NAME
+ tmux new-window -t $TMUX_SESSION_NAME -n 'merchant'
 
 for p in {0..4}; do
         tmux split-pane -v
