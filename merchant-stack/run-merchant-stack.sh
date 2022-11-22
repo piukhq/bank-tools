@@ -72,6 +72,7 @@ MIDAS_ENV_FILE=$(
   CONFIG_SERVICE_URL=http://127.0.0.1:8050/config_service
   POSTGRES_DSN="postgresql+psycopg2://$db_username:$db_password@localhost:5432/midas"
   PUSH_PROMETHEUS_METRICS=false
+  AZURE_AAD_TENANT_ID=a6e2367a-92ea-4e5a-b565-723830bcc095
 EOF
     )
 
@@ -186,10 +187,10 @@ if [[ $db_update = "true" ]] ; then
   pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_midas | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/midas.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/http\:\/\/callbacca/http\:\/\/localhost\:6401/g' > $directory/api_reflector.sql
+  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/api_reflector.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_europa | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') | sed 's/http\:\/\/api-reflector/localhost\:6400/g' > $directory/europa.sql
+  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_europa | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/europa.sql
   sleep 4
 
   kill %1
@@ -211,14 +212,6 @@ if [[ $db_update = "true" ]] ; then
   rm midas.sql
   rm europa.sql
   rm api_reflector.sql
-
-  ##  update europa endpoints to localhost
-  # -- europa updater
-  echo "Executing merchant_url replacer: api-reflector --> localhost:6400"
-  uri=postgresql://$db_username:$db_password@localhost:5432/europa
-  psql $uri -c "update config_service_configuration set merchant_url = replace(merchant_url, 'api-reflector', 'localhost:6400');"
-  sleep 4
-
 
 fi
 }
