@@ -2,7 +2,7 @@
 
 # This script will install, set environments, git pull and run Midas API, Midas consumer, Europa, API Reflector and Callbacca.
 
-# For full instructions, please see 'Installing and running the merchant stack with run-merchant-stack.sh' on Confluence.
+# For full instructions, please see 'Installing and running the retail stack with run-retail-stack.sh' on Confluence.
 
 # Requirements: 
 # - tmux
@@ -10,7 +10,7 @@
 # - git (authenticated in cli via either HTTPS or SSH (see below parameters))
 
 #Options:
-#-d <directory> : directory in which to install/run merchant services
+#-d <directory> : directory in which to install/run retail services
 #-u <username> : database username to be stored in .env
 #-p <password> : database password to be stored in .env
 #-i true : installs and updates services from staging (including git branch, .envs, databases (if -r true)). Otherwise just runs services
@@ -66,7 +66,7 @@ MIDAS_ENV_FILE=$(
   HERMES_URL=http://127.0.0.1:8000
   HADES_URL=http://0.0.0.0:8005/
   VAULT_TOKEN=<o0q2cx/pcbtWWNSQnLJtJhflyyw570Zkbr2kYQGasvNW>
-  VAULT_URL=https://bink-uksouth-staging-com.vault.azure.net/
+  VAULT_URL=https://uksouth-dev-2p5g.vault.azure.net/
   TXM_API_AUTH_ENABLED=False
   CREDENTIALS_LOCAL=False
   CONFIG_SERVICE_URL=http://127.0.0.1:8050/config_service
@@ -95,6 +95,14 @@ API_REFLECTOR_ENV_FILE=$(
   log_level=debug
   trace_query_descriptions=true
   OAUTHLIB_INSECURE_TRANSPORT=true
+EOF
+    )
+
+CALLBACCA_ENV_FILE=$(
+        cat <<EOF
+  bpl_callback_oauth2_resource=http://foo.url
+  bpl_azure_oauth2_token_url=http://foo.url
+  redis_url=redis://localhost:6379/0
 EOF
     )
 
@@ -170,7 +178,8 @@ echo "- (API-Reflector) Checking out and updating master branch..."
 git checkout master
 git pull --ff-only origin master
 
-echo "- (API-Reflector) Synching poetry..."
+echo "- (API-Reflector) Synching .env and poetry..."
+echo "$CALLBACCA_ENV_FILE" > .env && poetry install --sync
 poetry install --sync
 
 # Create/update databases
@@ -181,16 +190,16 @@ if [[ $db_update = "true" ]] ; then
 
   kubectl config use-context uksouth-staging
 
-  kubectl port-forward deploy/proxy-postgres 5432:5432 &
+  kubectl -n devops port-forward deploy/proxy-postgres 5432:5432 &
   sleep 3
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_midas | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/midas.sql
+  pg_dump $(kubectl get secret azure-postgres -o json | jq -r .data.common_midas | base64 --decode | sed 's/uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/midas.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/api_reflector.sql
+  pg_dump $(kubectl get secret azure-postgres -o json | jq -r .data.common_api_reflector | base64 --decode | sed 's/uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/api_reflector.sql
   sleep 4
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_europa | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/europa.sql
+  pg_dump $(kubectl get secret azure-postgres -o json | jq -r .data.common_europa | base64 --decode | sed 's/uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/europa.sql
   sleep 4
 
   kill %1
@@ -219,10 +228,10 @@ fi
 
 run_services(){
 
- TMUX_SESSION_NAME='merchant_stack'
+ TMUX_SESSION_NAME='retail'
  echo "Starting services in tmux session: $TMUX_SESSION_NAME"
  tmux -2 new-session -d -s $TMUX_SESSION_NAME
- tmux new-window -t $TMUX_SESSION_NAME -n 'merchant'
+ tmux new-window -t $TMUX_SESSION_NAME -n 'retail_stack'
 
 for p in {0..4}; do
         tmux split-pane -v
@@ -258,7 +267,7 @@ for p in {0..4}; do
   tmux send-keys -t 4 "echo '**Launching Callbacca on port 6401**'" C-m
   tmux send-keys -t 4 "cd $directory/callbacca && poetry run uvicorn asgi:app --port 6401" C-m
 
-  tmux attach-session -t 'merchant'
+  tmux attach-session -t 'retail'
 
 }
 

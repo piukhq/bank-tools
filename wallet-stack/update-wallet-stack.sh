@@ -60,17 +60,19 @@ setup_services() {
 
 HERMES_ENV_FILE=$(
         cat <<EOF
+HERMES_DATABASE_URL=postgres://postgres:pass@localhost:5438/hermes
 HERMES_DATABASE_HOST=localhost
-HERMES_DATABASE_PORT=5432
+HERMES_DATABASE_PORT=5438
 MIDAS_URL=http://0.0.0.0:8001
 MASTER_LOG_LEVEL=INFO
 UBIQUITY_LOG_LEVEL=INFO
 METIS_URL=http://127.0.0.1:8095
-VAULT_URL=https://bink-uksouth-dev-com.vault.azure.net/
+VAULT_URL=https://uksouth-dev-2p5g.vault.azure.net/
 SSO_OFF=True
 LOCAL_SECRETS=False
 PROMETHEUS_LOG_LEVEL=ERROR
 HERMES_LOCAL=True
+JSON_LOGGING=False
 
 EOF
     )
@@ -79,10 +81,11 @@ EOF
 ANGELIA_ENV_FILE=$(
         cat <<EOF
 
-LOG_LEVEL=DEBUG
-LOCAL_SECRETS=False
-POSTGRES_READ_DSN=postgresql://postgres@127.0.0.1:5432/hermes
-POSTGRES_WRITE_DSN=postgresql://postgres@127.0.0.1:5432/hermes
+LOG_LEVEL=INFO
+LOCAL_SECRETS=True
+LOCAL_SECRETS_PATH=example_local_secrets.json
+POSTGRES_READ_DSN=postgresql://postgres@127.0.0.1:5438/hermes
+POSTGRES_WRITE_DSN=postgresql://postgres@127.0.0.1:5438/hermes
 RABBIT_PASSWORD=guest
 RABBIT_USER=guest
 RABBIT_HOST=127.0.0.1
@@ -91,8 +94,9 @@ HERMES_URL=http://127.0.0.1:8000
 METRICS_SIDECAR_DOMAIN=localhost
 METRICS_PORT=4000
 PERFORMANCE_METRICS=0
-VAULT_URL=https://bink-uksouth-dev-com.vault.azure.net/
+VAULT_URL=https://uksouth-dev-2p5g.vault.azure.net/
 QUERY_LOGGING=False
+JSON_LOGGING=False
 
 EOF
     )
@@ -146,10 +150,10 @@ if [[ $db_update = "true" ]] ; then
 
   kubectl config use-context uksouth-staging
 
-  kubectl port-forward deploy/proxy-postgres 5432:5432 &
+  kubectl -n devops port-forward deploy/proxy-postgres 5432:5432 &
   sleep 3
 
-  pg_dump $(kubectl get secret azure-pgfs -o json | jq -r .data.common_hermes | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/hermes.sql
+  pg_dump $(kubectl get secret azure-postgres -o json | jq -r .data.common_hermes | base64 --decode | sed 's/bink-uksouth-.*.postgres.database.azure.com/127.0.0.1/g') > $directory/hermes.sql
   sleep 4
 
   kill %1
