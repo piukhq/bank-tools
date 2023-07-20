@@ -18,18 +18,33 @@ TMUX_SESSION_NAME='wallet-stack'
 tmux -2 new-session -d -s $TMUX_SESSION_NAME
 tmux new-window -t $TMUX_SESSION_NAME -n 'wallet'
 
-for p in {0..7}; do
-  tmux split-pane -v
-  tmux select-layout tiled
-done
-
+################################################################################
+# TMUX CONFIG
 # tmux gui formatting
 tmux set -g mouse on
 tmux set -g pane-border-status top
 tmux set -g pane-border-format "[#[fg=white]#{?pane_active,#[bold],} #P - #T #[fg=default,nobold]]"
 
+# tmux helpers
+# define path to tmux helpers
+main_script_dir=$(dirname "$0")
+tmux_scripts_path="../tmux-scripts"
+abs_path=$(readlink -f "$main_script_dir/$tmux_scripts_path")
+# Configure keybinds
+## Don't exit tmux when 'tmux kill-ses ...' is run
+# tmux set -g detach-on-destroy off
+
+## display menu to switch and maximize panes
+tmux bind -r C-l run-shell $abs_path/tmux-pane-menu.sh
+################################################################################
+
+for p in {0..7}; do
+  tmux split-pane -v
+  tmux select-layout tiled
+done
+
 # Launch services in panes
-  ## Hermes
+## Hermes
 tmux select-pane -t 0 -T Hermes-runserver
 tmux send-keys -t 0 "echo '** Launching Hermes Server **'" C-m
 tmux send-keys -t 0 "cd $directory/hermes && pipenv run python manage.py runserver" C-m
@@ -61,19 +76,18 @@ tmux select-pane -t 6 -T Metis-celery
 tmux send-keys -t 6 "echo '** Launching Metis celery **'" C-m
 tmux send-keys -t 6 "cd $directory/metis && poetry run celery -A metis.tasks worker --loglevel=INFO --concurrency=1" C-m
 
-
 if [ $RUN = "with_midas" ]; then
-##
-tmux select-pane -t 7 -T Midas_API
-tmux send-keys -t 7 "echo '** Launching Midas API **'" C-m
-tmux send-keys -t 7 "cd $directory/midas && pipenv run flask run -p 8001" C-m
+  ##
+  tmux select-pane -t 7 -T Midas_API
+  tmux send-keys -t 7 "echo '** Launching Midas API **'" C-m
+  tmux send-keys -t 7 "cd $directory/midas && pipenv run flask run -p 8001" C-m
 fi
 
 if [ $RUN2 = "with_reflector" ]; then
-##
-tmux select-pane -t 8 -T API_Reflector
-tmux send-keys -t 8 "echo '** Launching API Reflector **'" C-m
-tmux send-keys -t 8 "cd $directory/api-reflector && poetry run flask run" C-m
+  ##
+  tmux select-pane -t 8 -T API_Reflector
+  tmux send-keys -t 8 "echo '** Launching API Reflector **'" C-m
+  tmux send-keys -t 8 "cd $directory/api-reflector && poetry run flask run" C-m
 fi
 
 tmux attach-session -t 'wallet'
