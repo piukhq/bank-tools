@@ -36,6 +36,9 @@ abs_path=$(readlink -f "$main_script_dir/$tmux_scripts_path")
 
 ## display menu to switch and maximize panes
 tmux bind -r C-l run-shell $abs_path/tmux-pane-menu.sh
+
+## display menu to switch sessions
+tmux bind -r C-s run-shell $abs_path/tmux-session-menu.sh
 ################################################################################
 
 for p in {0..7}; do
