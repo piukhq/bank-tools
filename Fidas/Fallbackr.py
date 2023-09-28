@@ -1,17 +1,17 @@
-#
-#
-# Fallbackr
-#
-# Fake Midas callbacks to hermes
-# (I would NOT use the tkinter GUI!)
-#
-#
+"""
 
+Fallbackr
+
+Fake Midas callbacks to hermes
+(I would NOT use the tkinter GUI!)
+
+"""
+
+import sys
+import tkinter as tk
 from enum import IntEnum
 from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Combobox
-from tkinter import *
-import sys
 
 import requests
 
@@ -65,9 +65,11 @@ def update_status(
     scheme_account_id,
     journey=JourneyTypes.UPDATE,
     status=SchemeAccountStatus.ACTIVE,
-    user_info={},
-    server=HERMES
+    user_info=None,
+    server=HERMES,
 ):
+    if user_info is None:
+        user_info = {}
     print(f"**** Fallbacker called for scheme account {scheme_account_id} ****")
 
     url = f"{server}/schemes/accounts/{scheme_account_id}/status"
@@ -79,7 +81,7 @@ def update_status(
         "Content-type": "application/json",
         "transaction": "success",
         "User-agent": "Midas on localhost",
-        "Authorization": "token " + SERVICE_API_KEY,
+        "Authorization": f"token {SERVICE_API_KEY}",
     }
     response = requests.request("POST", url, json=payload, headers=headers)
     print(f"**** Hermes called for scheme account {scheme_account_id} ****")
@@ -110,7 +112,7 @@ def join_fail(slub, user):
         "Content-type": "application/json",
         "transaction": "join_error",
         "User-agent": "Midas on localhost",
-        "Authorization": "token " + SERVICE_API_KEY,
+        "Authorization": f"token {SERVICE_API_KEY}",
     }
     response = requests.request("POST", url, json=payload, headers=headers)
 
@@ -126,7 +128,7 @@ def join(slub, user):
         "Content-type": "application/json",
         "transaction": "success",
         "User-agent": "Midas on localhost",
-        "Authorization": "token " + SERVICE_API_KEY,
+        "Authorization": f"token {SERVICE_API_KEY}",
     }
 
     response = requests.request("POST", url, json=payload, headers=headers)
@@ -134,28 +136,28 @@ def join(slub, user):
     return response.json(), response.status_code
 
 
-class Fallbackr(Tk):
+class Fallbackr(tk.Tk):
     def __init__(self):
-        Tk.__init__(self)
+        tk.Tk.__init__(self)
         self.title("Fallbackr")
         self.geometry("600x400")
-        
-        lf = LabelFrame(self, text="Server")
+
+        lf = tk.LabelFrame(self, text="Server")
         lf.pack(fill="x")
-        self.server = StringVar()
+        self.server = tk.StringVar()
         server = Combobox(lf, textvariable=self.server, values=SERVERS)
         server.pack(fill="x")
         self.server.set(HERMES)
-        
-        lf = LabelFrame(self, text="Scheme Account ID")
+
+        lf = tk.LabelFrame(self, text="Scheme Account ID")
         lf.pack(fill="x")
-        self.scheme_account_id = StringVar()
-        server = Entry(lf, textvariable=self.scheme_account_id)
+        self.scheme_account_id = tk.StringVar()
+        server = tk.Entry(lf, textvariable=self.scheme_account_id)
         server.pack(fill="x")
-        
-        b = Button(self, text="Active", command=self.active_status)
+
+        b = tk.Button(self, text="Active", command=self.active_status)
         b.pack()
-        b = Button(self, text="Invalid Credentials", command=self.invalid_status)
+        b = tk.Button(self, text="Invalid Credentials", command=self.invalid_status)
         b.pack()
 
         self.loggee = ScrolledText(self, wrap="none")
@@ -164,9 +166,9 @@ class Fallbackr(Tk):
 
     def write(self, *stuff):
         for line in stuff:
-            self.loggee.insert("end", line+"\n")
+            self.loggee.insert("end", line + "\n")
         self.loggee.see("end")
-    
+
     def flush(self, *stuff):
         pass
 
@@ -179,6 +181,7 @@ class Fallbackr(Tk):
         id = self.scheme_account_id.get()
         server = self.server.get()
         update_status(id, server=server, status=SchemeAccountStatus.INVALID_CREDENTIALS)
+
 
 if __name__ == "__main__":
     # in your CLIENT code when you perform a PATCH Auth request (for example)

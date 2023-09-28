@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "fidas"
+version = "0.0.0"
+description = "Fake Midas"
+authors = ["Haffi Mazhar <haffimazhar96@gmail.com>"]
+readme = "README.md"
+packages = [{include = "*"}]
+
+[tool.poetry.dependencies]
+python = "^3.11.1"
+Flask = "^2.3.2"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

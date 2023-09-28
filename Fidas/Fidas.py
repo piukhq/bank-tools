@@ -1,20 +1,14 @@
-#
-# Fidas: Fake-Midas
-# used to STUB Midas endpoints for local dev testing
-#
-# M Franklin 2022
-# The following should get you up & running
-# pipenv --python 3.9
-# pipenv install
-# pipenv install --dev
-# pipenv run Fidas.py
-import json
+"""
+
+Fidas: Fake-Midas
+used to STUB Midas endpoints for local dev testing
+
+"""
 import time
+
+import fallbackr
+import style
 from flask import Flask, request
-
-from style import *
-import Fallbackr
-
 
 PORT = 8001  # Midas
 
@@ -22,38 +16,34 @@ NOW = int(time.time())
 LATER = NOW + (60 * 60 * 24 * 5)
 HAPPY = True
 
-# print(f"Is Fidas Happy ? : {HAPPY}")
-
 app = Flask(__name__)
 
 app.happy = HAPPY
 app.scheme_ids = []
 
 ICELAND_PAYLOAD = {
-        "value": 20.0,
-        "pending": None,
-        "prefix": "\u00a3",
-        "suffix": "",
-        "currency": "GBP",
-        "updated_at": NOW,
-        "description": "Balance from Fidas",
-        "reward_tier": 0,
-        "vouchers": [],
-    }
+    "value": 20.0,
+    "pending": None,
+    "prefix": "\u00a3",
+    "suffix": "",
+    "currency": "GBP",
+    "updated_at": NOW,
+    "description": "Balance from Fidas",
+    "reward_tier": 0,
+    "vouchers": [],
+}
 
 WASABI_PAYLOAD = {
-        "points": 120.0,
-        "pending": None,
-        "prefix": "\u00a3",
-        "suffix": "",
-        "currency": "GBP",
-        "updated_at": NOW,
-        "description": "Balance from Fidas",
-        "reward_tier": 0,
-        "vouchers": [],
-    }
-
-
+    "points": 120.0,
+    "pending": None,
+    "prefix": "\u00a3",
+    "suffix": "",
+    "currency": "GBP",
+    "updated_at": NOW,
+    "description": "Balance from Fidas",
+    "reward_tier": 0,
+    "vouchers": [],
+}
 
 
 # @app.route("/<scheme>/account_overview", methods=["GET"])
@@ -87,7 +77,7 @@ WASABI_PAYLOAD = {
 @app.route("/<scheme>/balance", methods=["GET"])
 def midas_balance(scheme: str):
     """
-    
+
     /{scheme-slug}/balance
 
     response is:
@@ -99,7 +89,7 @@ def midas_balance(scheme: str):
     # add this scheme account to fallbackr list
     if scheme_account_id not in app.scheme_ids:
         app.scheme_ids.append(scheme_account_id)
-    
+
     creds = request.args["credentials"]
     print(f"Credentials from Hermes: {creds}")
     # should hack together a dycrypt from midas code but meh; CBA
@@ -110,22 +100,21 @@ def midas_balance(scheme: str):
 
     print(f"***** Is Fidas happy? {app.happy} *****")
 
-    if app.happy:
-        if scheme == "wasabi-club":
-            return WASABI_PAYLOAD
-        elif scheme == "iceland-bonus-card":
-            return ICELAND_PAYLOAD
-        else:
-            return f"{scheme} : unsupported scheme", 500
-    else:      
+    if not app.happy:
         return f"{scheme} : INVALID_CREDENTIALS", 403
+    if scheme == "iceland-bonus-card":
+        return ICELAND_PAYLOAD
+    elif scheme == "wasabi-club":
+        return WASABI_PAYLOAD
+    else:
+        return f"{scheme} : unsupported scheme", 500
 
 
 # @app.route("/<scheme>/register", methods=["POST"])
 # def midas_register(scheme: str):
 #     """
 #     Fake the /{scheme}/register end point in Midas called by Hermes
-    
+
 #     hermes sends this as JSON POST data
 #     {
 #         "scheme_account_id": 243690,
@@ -134,28 +123,29 @@ def midas_balance(scheme: str):
 #         "status": 442,
 #         "journey_type": 0,
 #         "channel": "com.lloyds.api2",
-#     }   
+#     }
 #     """
 #     # print("Scheme Name:- ", scheme)
 #     incoming_payload = request.get_json()
 #     # print(incoming_payload["journey_type"])
 
 #     # user_info = {
-#     #     "scheme_account_id": incoming_payload["scheme_account_id"], 
-#     #     "status": "active", 
+#     #     "scheme_account_id": incoming_payload["scheme_account_id"],
+#     #     "status": "active",
 #     #     "channel": incoming_payload["channel"]
 #     #     }
 #     # pprint(user_info)
 
 #     outgoing_payload = {"message":"success"}
-#     return outgoing_payload 
-    
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+#     return outgoing_payload
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
 def catch_all(path):
     HTML = f"""
     <html>
-    
+
     <h1>Fidas - Endpoint Grabber</h1>
     <h2>You called endpoint:<h2>
     <pre>
@@ -164,24 +154,20 @@ def catch_all(path):
     </html>
     """
     print(f"You called endpoint : {path}")
-    return HEAD + HTML + FOOT
+    return style.HEAD + HTML + style.FOOT
 
 
 @app.route("/index", methods=["GET"])
 def index():
-    if app.happy:
-        fhap = "Yes"
-    else:
-        fhap = "Nope"
-
+    fhap = "Yes" if app.happy else "Nope"
     HTML = f"""
     <html>
     <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page">Index</li>
     </ol>
-    </nav> 
-    
+    </nav>
+
     <h1>Fidas - Fake Midas</h1>
 
     <h2>Is Fidas currently happy...? : {fhap}</h2>
@@ -197,7 +183,7 @@ def index():
     <li><a href="/wasabi-club/balance">wasabi-club</a></li>
     <li><a href="/iceland-bonus-card/balance">iceland-bonus-card</a></li>
     <li><a href="/bad-slug/balance">bad-slug</a></li>
-    </ul>    
+    </ul>
 
     <p>
     Visit any other endpoint and Fidas will show you the catch_all response
@@ -206,25 +192,25 @@ def index():
 
     </html>
     """
-    return HEAD + HTML + FOOT
+    return style.HEAD + HTML + style.FOOT
+
 
 @app.route("/config", methods=["GET", "POST"])
 def config():
-
     happy_form = request.form.get("HappyFidas")
-    if happy_form=="happy":
+    if happy_form == "happy":
         app.happy = True
-    elif happy_form=="unhappy":
+    elif happy_form == "unhappy":
         app.happy = False
 
     HTML = f"""
-<html>    
+<html>
     <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/index">Index</a></li>
         <li class="breadcrumb-item active" aria-current="page">Config</li>
     </ol>
-    </nav> 
+    </nav>
     <h1>Fidas is happy? : {app.happy}</h1>
     <div class="form-group">
     <form method="post" action="/config">
@@ -239,29 +225,28 @@ def config():
 </html>
     """
 
-    return HEAD + HTML + FOOT
+    return style.HEAD + HTML + style.FOOT
 
 
 @app.route("/fallbackr", methods=["GET", "POST"])
-def fallbackr():
-    id = request.form.get("scheme_account_id")
-    if id:
-        Fallbackr.update_status(id)
+def fallbackr_handler():
+    if id := request.form.get("scheme_account_id"):
+        fallbackr.update_status(id)
 
-
-    id_list = []
-    for id in app.scheme_ids:
-        id_list.append(f'<li><input class="form-control" type="submit" name="scheme_account_id" value="{id}"/></li>')
+    id_list = [
+        f'<li><input class="form-control" type="submit" name="scheme_account_id" value="{id}"/></li>'
+        for id in app.scheme_ids
+    ]
     id_list = "\n".join(id_list)
 
     HTML = f"""
-<html>   
+<html>
     <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/index">Index</a></li>
         <li class="breadcrumb-item active" aria-current="page">Fallbackr</li>
     </ol>
-    </nav> 
+    </nav>
     <h1>Fallbackr</h1>
     <p>
     An in memory list of scheme accounts sent to Fidas /scheme-slug/balance/ endpoint since last (re)start
@@ -277,9 +262,7 @@ def fallbackr():
 </html>
     """
 
-    return HEAD + HTML + FOOT
-
-
+    return style.HEAD + HTML + style.FOOT
 
 
 if __name__ == "__main__":
